@@ -183,7 +183,7 @@ tempo-operator.v0.15.4-1                Tempo Operator                   0.15.4-
 ```
 
 #### Tracing UI
-- Create [Tracing UI Plugin](config/ui-pluging.yaml)
+- Create [Tracing UI Plugin](config/ui-plugin.yaml)
 
 ```bash
 oc create -f config/ui-plugin.yaml
