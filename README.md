@@ -271,6 +271,8 @@ oc patch deployment/todo \
 oc set env deploy todo \
 OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-headless:4318 \
 -n $PROJECT
+ oc set env deploy todo OTEL_TRACES_SAMPLER_ARG="drop=/;drop=/q/health/live;drop=/q/health/ready;fallback=always_on" \
+ -n $PROJECT
 ```
 <!-- oc set env deploy todo quarkus.otel.exporter.otlp.endpoint- \
 -n $PROJECT -->
