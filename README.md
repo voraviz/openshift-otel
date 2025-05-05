@@ -1,4 +1,6 @@
 # OpenShift - OpenTelemetry with Tempo
+![](images/OpenTelemetry.png)
+
 - [OpenShift - OpenTelemetry with Tempo](#openshift---opentelemetry-with-tempo)
   - [Operators](#operators)
     - [Tempo Operator](#tempo-operator)
@@ -11,6 +13,7 @@
   - [OTEL Auto-Instrumentation](#otel-auto-instrumentation)
     - [Todo App (without OpenTelemetry library)](#todo-app-without-opentelemetry-library)
     - [Node.js and Go-lang App](#nodejs-and-go-lang-app)
+
 
 ## Operators
 - Create project demo
