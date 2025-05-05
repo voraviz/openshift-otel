@@ -11,8 +11,8 @@ spec:
         value: debug
       - name: OTEL_METRICS_EXPORTER
         value: none
-  # sampler:
-  #   type: always_on
+  sampler:
+    type: parentbased_traceidratio
   env:
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
       value: http/protobuf
@@ -20,7 +20,7 @@ spec:
     - b3
     - tracecontext
   go:
-    image: 'ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.20.0'
+    image: 'ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.20.0' # Fix bug for OTEL 0.119.0-2
     resourceRequirements:
       limits:
         cpu: 500m
