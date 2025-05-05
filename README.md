@@ -274,10 +274,6 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-headless:4318 \
  oc set env deploy todo OTEL_TRACES_SAMPLER_ARG="drop=/;drop=/q/health/live;drop=/q/health/ready;fallback=always_on" \
  -n $PROJECT
 ```
-
-- Specified TraceQL *{rootServiceName="todo" && span.db.statement!="unknown"}*
-
-![](images/trace-ui-with-traceql.png)
 <!-- oc set env deploy todo quarkus.otel.exporter.otlp.endpoint- \
 -n $PROJECT -->
 - Check todo's pod
@@ -296,6 +292,9 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-headless:4318 \
   [otel.javaagent 2025-05-04 13:27:02:012 +0000] [main] INFO io.opentelemetry.javaagent.tooling.VersionLogger - opentelemetry-javaagent - version: 1.33.6
   ```
 - Test todo app again and verify that traces still created even app container image does not contains openTelemetry library.
+- Specified TraceQL *{rootServiceName="todo" && span.db.statement!="unknown"}*
+
+![](images/trace-ui-with-traceql.png)
 
 ### RESTful App
 #### Node.js
