@@ -274,6 +274,10 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-headless:4318 \
  oc set env deploy todo OTEL_TRACES_SAMPLER_ARG="drop=/;drop=/q/health/live;drop=/q/health/ready;fallback=always_on" \
  -n $PROJECT
 ```
+
+- Specified TraceQL *{rootServiceName="todo" && span.db.statement!="unknown"}*
+
+![](images/trace-ui-with-traceql.png)
 <!-- oc set env deploy todo quarkus.otel.exporter.otlp.endpoint- \
 -n $PROJECT -->
 - Check todo's pod
