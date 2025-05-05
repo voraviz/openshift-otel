@@ -12,7 +12,7 @@ spec:
       - name: OTEL_METRICS_EXPORTER
         value: none
   sampler:
-    type: parentbased_traceidratio
+    type: always_on #parentbased_traceidratio
   env:
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
       value: http/protobuf
