@@ -1,5 +1,5 @@
 # OpenShift - OpenTelemetry with Tempo
-![](images/OpenTelemetry.png)
+![](images/OpenTelemetry.png | width=100)
 
 - [OpenShift - OpenTelemetry with Tempo](#openshift---opentelemetry-with-tempo)
   - [Operators](#operators)
