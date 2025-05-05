@@ -385,9 +385,9 @@ oc set env deploy frontend OTEL_PROPAGATORS=tracecontext,b3 -n $PROJECT
 
 - Create Service Account for go-lang pod and add SCC to this service account
 
-
 ```bash
-oc adm policy add-scc-to-user otel-go-instrumentation-scc -z default
+oc create sa go-lang-runner
+oc adm policy add-scc-to-user otel-go-instrumentation-scc -z go-lang-runner
 ```
 
 - Deploy [simple-go app](config/simple-go.yaml)

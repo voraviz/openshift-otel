@@ -33,6 +33,7 @@ spec:
         app: simple-go
         version: v1
     spec:
+      serviceAccountName: go-lang-runner
       containers:
       - env:
         - name: BACKEND
