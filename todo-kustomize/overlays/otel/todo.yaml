@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo
+spec:
+  replicas: 1
+  template:
+    spec: # sidecar.opentelemetry.io/inject: "true" 
+      containers:
+      - name: todo
+        image: quay.io/voravitl/todo:otel
+        imagePullPolicy: Always
+        env:
+        - name: quarkus.otel.exporter.otlp.endpoint
+          value: http://otel-collector-headless:4317

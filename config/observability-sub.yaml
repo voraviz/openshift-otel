@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-cluster-observability-operator
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  generateName: openshift-cluster-observability-operator-
+  annotations:
+    olm.providedAPIs: Alertmanager.v1.monitoring.rhobs,AlertmanagerConfig.v1alpha1.monitoring.rhobs,MonitoringStack.v1alpha1.monitoring.rhobs,Perses.v1alpha1.perses.dev,PersesDashboard.v1alpha1.perses.dev,PersesDatasource.v1alpha1.perses.dev,PodMonitor.v1.monitoring.rhobs,Probe.v1.monitoring.rhobs,Prometheus.v1.monitoring.rhobs,PrometheusAgent.v1alpha1.monitoring.rhobs,PrometheusRule.v1.monitoring.rhobs,ScrapeConfig.v1alpha1.monitoring.rhobs,ServiceMonitor.v1.monitoring.rhobs,ThanosQuerier.v1alpha1.monitoring.rhobs,ThanosRuler.v1.monitoring.rhobs,UIPlugin.v1alpha1.observability.openshift.io
+  namespace: openshift-cluster-observability-operator
+spec:
+  upgradeStrategy: Default
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  labels:
+    operators.coreos.com/cluster-observability-operator.openshift-cluster-observability: ""
+  name: cluster-observability-operator
+  namespace: openshift-cluster-observability-operator
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: cluster-observability-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  #startingCSV: cluster-observability-operator.v1.1.1

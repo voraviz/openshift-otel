@@ -1,0 +1,70 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel
+spec:
+  managementState: managed
+  serviceAccount: otel-collector
+  observability:
+    metrics:
+      enableMetrics: true
+  config:
+    extensions:
+      bearertokenauth:
+        filename: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    connectors:
+      spanmetrics: 
+        metrics_flush_interval: 15s
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+      jaeger:
+        protocols:
+          thrift_binary:  {}
+          thrift_compact:  {}
+          thrift_http:  {}
+          grpc: {}
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+      batch:
+        send_batch_size: 10000
+        timeout: 10s
+      resourcedetection:
+        detectors: [openshift]
+        timeout: 2s
+    exporters:
+      otlp/dev:
+        endpoint: tempo-sample-gateway:4317
+        tls:
+          insecure: true
+          insecure_skip_verify: true
+          ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"   
+          server_name_override: "tempo-sample-gateway.PROJECT.svc.cluster.local"
+        auth:
+          authenticator: bearertokenauth
+        headers:
+          X-Scope-OrgID: "dev"        
+      prometheus: 
+        endpoint: 0.0.0.0:8889
+        add_metric_suffixes: false
+        resource_to_telemetry_conversion:
+          enabled: true     
+      # debug: {}
+
+    service:
+      extensions: [bearertokenauth]
+      pipelines:
+        traces:
+          receivers: [otlp, jaeger]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/dev, spanmetrics]
+        metrics:
+          receivers: [spanmetrics]
+          exporters: [prometheus]

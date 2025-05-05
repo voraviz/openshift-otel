@@ -1,0 +1,5 @@
+resources:
+- todo-db.yaml
+- todo.yaml
+- todo-service.yaml
+- todo-route.yaml

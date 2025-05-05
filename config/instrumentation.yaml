@@ -1,0 +1,30 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: instrumentation
+spec:
+  exporter:
+    endpoint: 'http://otel-collector-headless:4318'
+  java:
+    env:
+      - name: OTEL_JAVAAGENT_DEBUG
+        value: debug
+      - name: OTEL_METRICS_EXPORTER
+        value: none
+  # sampler:
+  #   type: always_on
+  env:
+    - name: OTEL_EXPORTER_OTLP_PROTOCOL
+      value: http/protobuf
+  propagators:
+    - b3
+    - tracecontext
+  go:
+    image: 'ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.20.0'
+    resourceRequirements:
+      limits:
+        cpu: 500m
+        memory: 64Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
