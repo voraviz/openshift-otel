@@ -48,6 +48,8 @@ spec:
             value: backend
           - name: OTEL_PROPAGATORS
             value: tracecontext,b3
+          - name: OTEL_TRACES_SAMPLER_ARG
+            value: "drop=/q/health/ready;drop=/q/health/live;fallback=always_on"
         ports:
         - containerPort: 8080
         securityContext:
