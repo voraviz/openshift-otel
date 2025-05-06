@@ -377,7 +377,10 @@ oc set env deploy frontend OTEL_PROPAGATORS=tracecontext,b3 -n $PROJECT
 ```
 
 #### Go-lang
-- Create [SCC](config/otel-go-instrument-scc.yaml) for for go-lang instrumentation
+
+*Remark: With opentelemetry-operator.v0.119.0-2 and go autoinstrumentation-go:v0.20.0 only work with golang 1.23*
+
+- Create [SCC](config/otel-go-instrument-scc.yaml) for for go-lang instrumentation 
 
 ```bash
  oc create -f config/otel-go-instrument-scc.yaml -n $PROJECT
