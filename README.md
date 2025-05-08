@@ -34,7 +34,7 @@ oc new-project $PROJECT
 
 ```bash
 oc create -f config/tempo-sub.yaml
-oc wait --for condition=ready --timeout=180s pod -l app.kubernetes.io/name=tempo-operator  -n openshift-tempo-operator
+oc wait --for condition=ready --timeout=300s pod -l app.kubernetes.io/name=tempo-operator  -n openshift-tempo-operator
 oc get po -l app.kubernetes.io/name=tempo-operator -n openshift-tempo-operator
 ```
 
@@ -83,6 +83,7 @@ tempomonolithic.tempo.grafana.com/sample created
 - Check TempoMonolithic operator status
 
 ```bash
+oc wait --for condition=ready --timeout=300s pod -l app.kubernetes.io/name=tempo-monolithic -n $PROJECT
 oc get po -l app.kubernetes.io/component=tempo -n $PROJECT
 ```
 
@@ -111,6 +112,8 @@ tempo-storage-tempo-sample-0   Bound    pvc-13ef64d5-ca36-41a9-bcd1-81e82fa540f5
 
 ```bash
 oc create -f config/otel-sub.yaml
+oc wait --for condition=ready --timeout=300s pod -l app.kubernetes.io/name=opentelemetry-operator -n openshift-operators
+
 ```
 
 Output
@@ -139,7 +142,7 @@ tempo-operator.v0.15.4-1            Tempo Operator                   0.15.4-1   
 
 ```bash
 cat config/otel-collector-multi-tenant.yaml | sed 's/PROJECT/'$PROJECT'/' | oc apply -n $PROJECT -f -
-oc wait --for condition=ready --timeout=180s pod -l app.kubernetes.io/managed-by=tempo-operator  -n $PROJECT 
+oc wait --for condition=ready --timeout=180s pod -l app.kubernetes.io/name=otel-collector  -n $PROJECT
 oc get po -l  app.kubernetes.io/managed-by=opentelemetry-operator -n $PROJECT
 ```
 
@@ -148,8 +151,8 @@ Output
 ```bash
 opentelemetrycollector.opentelemetry.io/otel created
 pod/tempo-sample-0 condition met
-NAME                              READY   STATUS              RESTARTS   AGE
-otel-collector-54bc66dd66-jhrzf   0/1     ContainerCreating   0          3s
+NAME                              READY   STATUS    RESTARTS   AGE
+otel-collector-54bc66dd66-gfl2t   1/1     Running   0          2m6s
 ```
 
 ### Cluster Observability Operator
@@ -315,7 +318,7 @@ route.route.openshift.io/frontend created
 - Annotate deployment for auto-instrumentation
 
 ```bash
- oc patch deployment/frontend \
+oc patch deployment/frontend \
     -p '{"spec":{"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-nodejs":"true"}}}}}' \
     -n $PROJECT
 ```
