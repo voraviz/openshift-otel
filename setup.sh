@@ -4,6 +4,7 @@ PROJECT=demo
 oc new-project $PROJECT
 oc create -f config/tempo-sub.yaml
 sleep 60
+cat config/tempoMonolithic.yaml | sed 's/PROJECT/'$PROJECT'/g' | oc create -f -
 oc wait --for condition=ready --timeout=300s pod -l app.kubernetes.io/name=tempo-operator  -n openshift-tempo-operator
 clear
 oc get po -l app.kubernetes.io/name=tempo-operator -n openshift-tempo-operator
@@ -41,3 +42,21 @@ oc create sa go-lang-runner
 oc adm policy add-scc-to-user otel-go-instrumentation-scc -z go-lang-runner
 oc create -f config/simple-go.yaml -n $PROJECT
 oc create -f config/backend.yaml -n $PROJECT
+oc wait --for condition=ready --timeout=180s pod -l app=backend  -n $PROJECT
+FRONTEND_URL=https://$(oc get route frontend -n $PROJECT -o jsonpath='{.spec.host}')
+COUNT=0
+while [ $COUNT -lt 10 ];
+do 
+  curl -v $FRONTEND_URL
+  COUNT=$((COUNT+1))
+  sleep 1
+done
+oc wait --for condition=ready --timeout=180s pod -l app=todo  -n $PROJECT
+TODO_URL=https://$(oc get route todo -n $PROJECT -o jsonpath='{.spec.host}')
+COUNT=0
+while [ $COUNT -lt 10 ];
+do 
+  curl -v $TODO_URL
+  COUNT=$((COUNT+1))
+  sleep 1
+done
