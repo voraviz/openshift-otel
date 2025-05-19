@@ -18,6 +18,8 @@
       - [Go-lang](#go-lang)
       - [Java App](#java-app)
       - [Test RESTful App](#test-restful-app)
+  - [Grafana](#grafana)
+  - [If you're too busy](#if-youre-too-busy)
 
 
 ## Operators
@@ -538,7 +540,20 @@ Frontend version: v1 => [Backend: http://simple-go:8080, Response: 200, Body: Ba
   
   ![](images/frontend-trace-client-info.png)
 
-  
+## Grafana
+
+<!-- - Install [Grafana Operator](https://grafana.github.io/grafana-operator/docs/installation/kustomize/)
+
+```bash
+oc create -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-cluster_scoped.yaml
+``` -->
+
+## If you're too busy
+
+- All in one [bash script](setup.sh)
+
+
+
 
 
   
@@ -579,3 +594,6 @@ oc scale deploy simple-go --replicas=0 -n $PROJECT;oc scale deploy simple-go --r
 <!--
 ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.20.0
 >
+
+registry.redhat.io/ubi8/nodejs-20:9.6-1745586361
+grype reistry.redhat.io/ubi8/nodejs-20:latest --only-fixed
