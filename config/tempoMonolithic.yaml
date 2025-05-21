@@ -70,9 +70,9 @@ spec:
       backend: pv
       size: 1Gi
   observability:
-    grafana:
-      dataSource:
-        enabled: true
+    # grafana:
+    #   dataSource:
+    #     enabled: true
     metrics:
       prometheusRules:
         enabled: true
