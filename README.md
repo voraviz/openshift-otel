@@ -3,9 +3,11 @@
 | ![Logo](images/OpenTelemetry.png)                  | 
 
 - [OpenShift - OpenTelemetry with Tempo](#openshift---opentelemetry-with-tempo)
+  - [TL;DR](#tldr)
   - [Operators](#operators)
     - [Tempo Operator](#tempo-operator)
       - [Tempo Monolithic](#tempo-monolithic)
+      - [TempoStack](#tempostack)
     - [Distributed Tracing Data Collection Operator](#distributed-tracing-data-collection-operator)
       - [Config OTEL Collector](#config-otel-collector)
     - [Cluster Observability Operator](#cluster-observability-operator)
@@ -19,8 +21,10 @@
       - [Java App](#java-app)
       - [Test RESTful App](#test-restful-app)
   - [Grafana](#grafana)
-  - [If you're too busy](#if-youre-too-busy)
 
+## TL;DR
+
+- If you're too busy then try this all in one [bash script](setup.sh)
 
 ## Operators
 - Create project demo
@@ -109,6 +113,38 @@ NAME                           STATUS   VOLUME                                  
 tempo-storage-tempo-sample-0   Bound    pvc-13ef64d5-ca36-41a9-bcd1-81e82fa540f5   2Gi        RWO            gp3-csi        <unset>                 2m21s
 ```
 
+#### TempoStack
+
+- Tempo need S3 bucket for store data. Prepare your S3 bucket. Following example is using the same bucket with OpenShift image registry
+
+```bash
+S3_BUCKET=$(oc get configs.imageregistry.operator.openshift.io/cluster -o jsonpath='{.spec.storage.s3.bucket}' -n openshift-image-registry)
+REGION=$(oc get configs.imageregistry.operator.openshift.io/cluster -o jsonpath='{.spec.storage.s3.region}' -n openshift-image-registry)
+ACCESS_KEY_ID=$(oc get secret image-registry-private-configuration -o jsonpath='{.data.credentials}' -n openshift-image-registry|base64 -d|grep aws_access_key_id|awk -F'=' '{print $2}'|sed 's/^[ ]*//')
+SECRET_ACCESS_KEY=$(oc get secret image-registry-private-configuration -o jsonpath='{.data.credentials}' -n openshift-image-registry|base64 -d|grep aws_secret_access_key|awk -F'=' '{print $2}'|sed 's/^[ ]*//')
+ENDPOINT=$(echo "https://s3.$REGION.amazonaws.com")
+DEFAULT_STORAGE_CLASS=$(oc get sc -A -o jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}')
+```
+
+- Create secret to store S3 bucket's credentials
+
+```bash
+oc create secret generic tempo-s3 \
+  --from-literal=name=tempo \
+  --from-literal=bucket=$S3_BUCKET  \
+  --from-literal=endpoint=$ENDPOINT \
+  --from-literal=access_key_id=$ACCESS_KEY_ID \
+  --from-literal=access_key_secret=$SECRET_ACCESS_KEY \
+  -n $PROJECT
+```
+- Create [TempoStack](config/tempoStack.yaml) instance in project demo 
+
+```bash
+cat config/tempoStack-multi-tenant.yaml | sed 's/PROJECT/'$PROJECT'/'  | oc apply -n $PROJECT -f -
+oc wait --for condition=ready --timeout=180s pod -l app.kubernetes.io/managed-by=tempo-operator  -n $PROJECT 
+oc get po -l  app.kubernetes.io/managed-by=tempo-operator -n $PROJECT
+```
+
 ### Distributed Tracing Data Collection Operator
 - Install [Distributed Tracing Data Collection Operator](config/otel-sub.yaml)
 
@@ -140,15 +176,33 @@ tempo-operator.v0.15.4-1            Tempo Operator                   0.15.4-1   
 
 #### Config OTEL Collector
 
-- Create OTEL collector
+
+  
+- Set environment variables for Tempo service name and URL
+  
+  - TempoMonolithic
+    
+```bash
+TEMPO=tempo-sample-gateway:4317
+TEMPO_URL=tempo-sample-gateway.$PROJECT.svc.cluster.local
+```
+
+  - TempoStack
 
 ```bash
-cat config/otel-collector-multi-tenant.yaml | sed 's/PROJECT/'$PROJECT'/' | oc apply -n $PROJECT -f -
+TEMPO=tempo-sample-gateway:8090
+TEMPO_URL=tempo-sample-gateway.$PROJECT.svc.cluster.local
+```
+
+- Create [OTEL collector](config/otel-collector-multi-tenant.yaml)
+
+```bash
+cat config/otel-collector-multi-tenant.yaml|sed 's/change_endpoint: .*/endpoint: '$TEMPO'/' | sed 's/change_server_name_override: .*/server_name_override: '$TEMPO_URL'/' | oc apply -n $PROJECT -f -
 oc wait --for condition=ready --timeout=180s pod -l app.kubernetes.io/name=otel-collector  -n $PROJECT
 oc get po -l  app.kubernetes.io/managed-by=opentelemetry-operator -n $PROJECT
 ```
 
-Output
+Output of TempoMonolithic
 
 ```bash
 opentelemetrycollector.opentelemetry.io/otel created
@@ -541,6 +595,30 @@ Frontend version: v1 => [Backend: http://simple-go:8080, Response: 200, Body: Ba
   ![](images/frontend-trace-client-info.png)
 
 ## Grafana
+- Create prject and install Grafana Operator
+
+```bash
+oc new-project grafana
+oc create -f config/grafana-sub.yaml
+```
+
+- Create Grafana Dashboard
+```bash
+oc create -f config/grafana.yaml -n grafana
+```
+- Get user and password
+```bash
+USER=$(oc get secret grafana-tempo-admin-credentials -o jsonpath='{.data.GF_SECURITY_ADMIN_USER}' | base64 -d)
+PASSWORD=$(oc get secret grafana-tempo-admin-credentials -o jsonpath='{.data.GF_SECURITY_ADMIN_PASSWORD}' | base64 -d)
+```
+- Config Tempo Datasource
+
+    | Parameter | Value |  
+    |-----------|-------|
+    |URL | https://tempo-{name}-query-frontend.{namespace}.svc.cluster.local:3200 |
+    |TLS Client Auth | true | 
+    |Skip Verify TLS | true | 
+
 
 <!-- - Install [Grafana Operator](https://grafana.github.io/grafana-operator/docs/installation/kustomize/)
 
@@ -548,9 +626,6 @@ Frontend version: v1 => [Backend: http://simple-go:8080, Response: 200, Body: Ba
 oc create -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-cluster_scoped.yaml
 ``` -->
 
-## If you're too busy
-
-- All in one [bash script](setup.sh)
 
 
 

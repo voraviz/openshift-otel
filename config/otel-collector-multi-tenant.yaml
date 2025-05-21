@@ -41,12 +41,12 @@ spec:
         timeout: 2s
     exporters:
       otlp/dev:
-        endpoint: tempo-sample-gateway:4317
+        change_endpoint: TEMPO
         tls:
           insecure: true
           insecure_skip_verify: true
           ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"   
-          server_name_override: "tempo-sample-gateway.PROJECT.svc.cluster.local"
+          change_server_name_override: TEMPO_URL
         auth:
           authenticator: bearertokenauth
         headers:
