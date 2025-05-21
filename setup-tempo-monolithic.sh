@@ -17,7 +17,12 @@ oc wait --for condition=ready --timeout=300s pod -l app.kubernetes.io/name=opent
 clear
 oc get csv -n openshift-operators
 clear
-cat config/otel-collector-multi-tenant.yaml | sed 's/PROJECT/'$PROJECT'/' | oc apply -n $PROJECT -f -
+TEMPO=tempo-sample-gateway:4317
+TEMPO_URL=tempo-sample-gateway.$PROJECT.svc.cluster.local
+cat config/otel-collector-multi-tenant.yaml| \
+sed 's/change_endpoint: .*/endpoint: '$TEMPO'/' | \
+sed 's/change_server_name_override: .*/server_name_override: '$TEMPO_URL'/' | \
+oc apply -n $PROJECT -f -
 oc wait --for condition=ready --timeout=180s pod -l app.kubernetes.io/name=otel-collector  -n $PROJECT
 oc get po -l  app.kubernetes.io/managed-by=opentelemetry-operator -n $PROJECT
 oc create -f config/observability-sub.yaml
