@@ -3,7 +3,7 @@ SLEEP=60
 PROJECT=demo
 oc new-project $PROJECT
 oc create -f config/tempo-sub.yaml
-sleep 60
+sleep $SLEEP
 cat config/tempoMonolithic.yaml | sed 's/PROJECT/'$PROJECT'/g' | oc create -f -
 oc wait --for condition=ready --timeout=300s pod -l app.kubernetes.io/name=tempo-operator  -n openshift-tempo-operator
 clear
@@ -12,7 +12,7 @@ oc get csv -n openshift-operators
 oc wait --for condition=ready --timeout=300s pod -l app.kubernetes.io/name=tempo-monolithic -n $PROJECT
 oc get po -l app.kubernetes.io/component=tempo -n $PROJECT
 oc create -f config/otel-sub.yaml
-sleep 60
+sleep $SLEEP
 oc wait --for condition=ready --timeout=300s pod -l app.kubernetes.io/name=opentelemetry-operator -n openshift-operators
 clear
 oc get csv -n openshift-operators
@@ -21,7 +21,7 @@ cat config/otel-collector-multi-tenant.yaml | sed 's/PROJECT/'$PROJECT'/' | oc a
 oc wait --for condition=ready --timeout=180s pod -l app.kubernetes.io/name=otel-collector  -n $PROJECT
 oc get po -l  app.kubernetes.io/managed-by=opentelemetry-operator -n $PROJECT
 oc create -f config/observability-sub.yaml
-sleep 60
+sleep $SLEEP
 oc create -f config/ui-plugin.yaml
 oc create -f config/instrumentation.yaml -n $PROJECT
 oc apply -k todo-kustomize/base -n $PROJECT
@@ -42,21 +42,18 @@ oc create sa go-lang-runner
 oc adm policy add-scc-to-user otel-go-instrumentation-scc -z go-lang-runner
 oc create -f config/simple-go.yaml -n $PROJECT
 oc create -f config/backend.yaml -n $PROJECT
+oc wait --for condition=ready --timeout=180s pod -l app=simple-go  -n $PROJECT
+oc wait --for condition=ready --timeout=180s pod -l app=frontend  -n $PROJECT
 oc wait --for condition=ready --timeout=180s pod -l app=backend  -n $PROJECT
-FRONTEND_URL=https://$(oc get route frontend -n $PROJECT -o jsonpath='{.spec.host}')
-COUNT=0
-while [ $COUNT -lt 10 ];
-do 
-  curl -v $FRONTEND_URL
-  COUNT=$((COUNT+1))
-  sleep 1
-done
 oc wait --for condition=ready --timeout=180s pod -l app=todo  -n $PROJECT
+FRONTEND_URL=https://$(oc get route frontend -n $PROJECT -o jsonpath='{.spec.host}')
 TODO_URL=https://$(oc get route todo -n $PROJECT -o jsonpath='{.spec.host}')
 COUNT=0
 while [ $COUNT -lt 10 ];
 do 
+  curl -v $FRONTEND_URL
+  SLEEP=$(( ( RANDOM % 5 )  + 1 ))
   curl -v $TODO_URL
+  SLEEP=$(( ( RANDOM % 5 )  + 1 ))
   COUNT=$((COUNT+1))
-  sleep 1
 done

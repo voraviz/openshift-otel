@@ -24,7 +24,7 @@
 
 ## TL;DR
 
-- If you're too busy then try this all in one [bash script](setup.sh)
+- If you're too busy then try this all in one [bash script](setup.sh) to setup Tempo Monolithic.
 
 ## Operators
 - Create project demo
