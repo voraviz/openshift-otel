@@ -1,0 +1,24 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana-tempo
+  labels:
+    dashboard: grafana-tempo
+spec:
+  config:
+    auth:
+      disable_login_form: 'false'
+    log:
+      mode: console
+    security:
+      admin_password: start
+      admin_user: root
+  route:
+    spec:
+      tls:
+        termination: edge
+        insecureEdgeTerminationPolicy: Redirect
+      to:
+        weight: 100
+        name: grafana-tempo-service
+        kind: Service

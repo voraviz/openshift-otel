@@ -603,14 +603,21 @@ oc create -f config/grafana-sub.yaml
 ```
 
 - Create Grafana Dashboard
+
 ```bash
 oc create -f config/grafana.yaml -n grafana
 ```
+
 - Get user and password
+
 ```bash
 USER=$(oc get secret grafana-tempo-admin-credentials -o jsonpath='{.data.GF_SECURITY_ADMIN_USER}' | base64 -d)
 PASSWORD=$(oc get secret grafana-tempo-admin-credentials -o jsonpath='{.data.GF_SECURITY_ADMIN_PASSWORD}' | base64 -d)
 ```
+- Login to Grafana Dashboard and add Tempo Datasource
+
+  ![](images/grafana-datasource.png)
+
 - Config Tempo Datasource
 
     | Parameter | Value |  
@@ -618,6 +625,21 @@ PASSWORD=$(oc get secret grafana-tempo-admin-credentials -o jsonpath='{.data.GF_
     |URL | https://tempo-{name}-query-frontend.{namespace}.svc.cluster.local:3200 |
     |TLS Client Auth | true | 
     |Skip Verify TLS | true | 
+
+   
+    TLS Configuration
+
+    | Parameter | Value |  
+    |-----------|-------|
+    |ServerName | tempo-{name}-query-frontend.<project>.svc.cluster.local |  
+    |Client Cert| oc get secret tempo-{name}-query-frontend-mtls -n {namespace} -o jsonpath='{.data.tls\\.crt}'\|base64 -d |  
+    |Client Key | oc get secret tempo-{name}-query-frontend-mtls -n {namespace} -o jsonpath='{.data.tls\\.key}'\|base64 -d |  
+    
+    Custom HTTP Header
+
+    | Parameter | Value |  
+    |-----------|-------|
+    |X-Scope-OrgID | Tenant ID specified in tempo configuration |
 
 
 <!-- - Install [Grafana Operator](https://grafana.github.io/grafana-operator/docs/installation/kustomize/)

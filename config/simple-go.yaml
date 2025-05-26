@@ -46,7 +46,7 @@ spec:
           value: /app/api
         - name: OTEL_PROPAGATORS
           value: tracecontext,b3
-        image: quay.io/voravitl/simple-rest-go:go-1.23
+        image: quay.io/voravitl/simple-rest-go:latest
         imagePullPolicy: Always
         name: simple-go
         ports:
