@@ -68,8 +68,6 @@ spec:
       labels:
         app: todo-db
         version: v1
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
       containers:
       - env:
@@ -95,6 +93,9 @@ spec:
           limits:
             cpu: "1"
             memory: 1024Mi
+          requests:
+            cpu: "500m"
+            memory: 512Mi
         # livenessProbe:
         #   exec:
         #     command:

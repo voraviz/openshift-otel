@@ -12,6 +12,7 @@ metadata:
     app.kubernetes.io/name: java
     app.kubernetes.io/part-of: todo-app
     app.openshift.io/runtime: quarkus
+    app.openshift.io/runtime-version: "3.21.0"
   name: todo
 spec:
   progressDeadlineSeconds: 600
@@ -31,12 +32,11 @@ spec:
         app: todo
         version: v1
       annotations:
-        sidecar.istio.io/rewriteAppHTTPProbers: "false"
         app.openshift.io/connects-to: '[{"apiVersion":"apps.openshift.io/v1","kind":"Deployment","name":"todo-db"}]'
     spec:
       containers:
       - name: todo
-        image: quay.io/voravitl/todo:latest
+        image: quay.io/voravitl/todo:latest  # todo image without otel library
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -61,8 +61,8 @@ spec:
           httpGet:
             path: /q/health/ready
             port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 180
+          initialDelaySeconds: 12
+          periodSeconds: 60
           successThreshold: 1
           failureThreshold: 3
         livenessProbe:
@@ -70,7 +70,7 @@ spec:
             path: /q/health/live
             port: 8080
           initialDelaySeconds: 10
-          periodSeconds: 600
+          periodSeconds: 60
           successThreshold: 1
           failureThreshold: 3
         securityContext:

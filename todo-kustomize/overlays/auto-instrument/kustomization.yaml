@@ -1,3 +1,12 @@
+# #namePrefix: prod-
+# commonLabels:
+#   environment: dev
+# commonAnnotations:
+#   description: This is Dev environment
+# bases:
+# - ../../base
+# patchesStrategicMerge:
+# - todo.yaml
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 # CommonLabels will be added to all resources and selectors
@@ -8,14 +17,24 @@ resources:
 images:
   - name: quay.io/voravitl/todo 
     newName: quay.io/voravitl/todo 
-    newTag: otel 
+    newTag: latest 
 patches:
 - patch: |-
+
+    - op: add
+      path: /spec/template/metadata/annotations
+      value: 
+        instrumentation.opentelemetry.io/inject-java: "true"
     - op: add
       path: /spec/template/spec/containers/0/env/-
       value:
-        name: quarkus.otel.exporter.otlp.endpoint
-        value: "http://otel-collector-headless:4317"
+        name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "http://otel-collector-headless:4318"
+    - op: add
+      path: /spec/template/spec/containers/0/env/-
+      value:
+        name: OTEL_TRACES_SAMPLER_ARG
+        value: "drop=/;drop=/q/health/live;drop=/q/health/ready;fallback=always_on"
     - op: replace
       path: /spec/template/spec/containers/0/readinessProbe/failureThreshold
       value: 3

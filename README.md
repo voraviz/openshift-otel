@@ -211,6 +211,24 @@ NAME                              READY   STATUS    RESTARTS   AGE
 otel-collector-54bc66dd66-gfl2t   1/1     Running   0          2m6s
 ```
 
+Output of TempoStack
+
+```bash
+pod/tempo-sample-compactor-67474b45d4-sg2l7 condition met
+pod/tempo-sample-distributor-648954cc76-njtst condition met
+pod/tempo-sample-gateway-c8f6f755f-78jqx condition met
+pod/tempo-sample-ingester-0 condition met
+pod/tempo-sample-querier-67db7759c5-pgbkg condition met
+pod/tempo-sample-query-frontend-656c6bbbdc-h7fjf condition met
+NAME                                           READY   STATUS    RESTARTS   AGE
+tempo-sample-compactor-67474b45d4-sg2l7        1/1     Running   0          74s
+tempo-sample-distributor-648954cc76-njtst      1/1     Running   0          75s
+tempo-sample-gateway-c8f6f755f-78jqx           2/2     Running   0          74s
+tempo-sample-ingester-0                        1/1     Running   0          74s
+tempo-sample-querier-67db7759c5-pgbkg          1/1     Running   0          74s
+tempo-sample-query-frontend-656c6bbbdc-h7fjf   3/3     Running   0          74s
+```
+
 ### Cluster Observability Operator
 - Install [Cluster Observability Operator](config/cluster-observability-sub.yaml)
 
@@ -317,11 +335,23 @@ instrumentation.opentelemetry.io/instrumentation created
 ```
 ### Todo App (without OpenTelemetry library)
 - Replace Todo Application to version that does not included opentelemetry library
+
 ```bash
 oc delete -k todo-kustomize/overlays/otel -n $PROJECT
-oc apply -k todo-kustomize/base -n $PROJECT
+oc apply -k todo-kustomize/overlays/auto-instrument -n $PROJECT
 ```
-- Patch deployment to annotate with *instrumentation.opentelemetry.io/inject-java=true* and set environment variable
+
+Check Kustomize configuration for [Auto-Instrument](todo-kustomize/overlays/auto-instrument.yaml)
+
+- Annotate with *instrumentation.opentelemetry.io/inject-java=true*
+- Add following environemnt variables
+
+| Environment Variable        | Value                                                              | Description                               |
+|-----------------------------|--------------------------------------------------------------------|-------------------------------------------|
+| OTEL_EXPORTER_OTLP_ENDPOINT | http://otel-collector-headless:4318                                | OTEL Service and port                     |
+| OTEL_TRACES_SAMPLER_ARG     | drop=/;drop=/q/health/live;drop=/q/health/ready;fallback=always_on | Config trace sampling to skip health chek |
+
+- Another way to config this is patch deployment and set environment variable with following command
 
 ```bash
 oc patch deployment/todo \
