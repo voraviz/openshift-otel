@@ -23,11 +23,17 @@ patches:
       path: /spec/template/spec/containers/0/readinessProbe/successThreshold
       value: 1
     - op: replace
+      path: /spec/template/spec/containers/0/readinessProbe/periodSeconds
+      value: 300
+    - op: replace
       path: /spec/template/spec/containers/0/livenessProbe/failureThreshold
       value: 3
     - op: replace
       path: /spec/template/spec/containers/0/livenessProbe/successThreshold
       value: 1
+    - op: replace
+      path: /spec/template/spec/containers/0/livenessProbe/periodSeconds
+      value: 300
   target:
     kind: Deployment
     name: todo
