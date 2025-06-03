@@ -333,6 +333,8 @@ pod/todo-7c6bddcdcb-t7pt6 condition met
 | {span.http.response.status_code >= 500}                  | HTTP status code is greater or equals to 500 ( Server side error) |
 
 
+![](images/TraceQL-spanId.png)
+
 ## OTEL Auto-Instrumentation
 - Create [Instrumentation](config/instrumentation.yaml)
 ```bash
