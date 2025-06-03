@@ -323,6 +323,15 @@ pod/todo-7c6bddcdcb-t7pt6 condition met
 
   ![](images/todo-trace-update-todo-sql.png)
 
+- Example of TraceQL
+
+| TraceQL                                                  | Description                                                       |
+|----------------------------------------------------------|-------------------------------------------------------------------|
+| {trace:id=~"f738c.*"}                                    | Trace ID start with "f738c"                                       |
+| {span:id="2f636ff7a3f65a45"}                             | Span ID equals to 2f636ff7a3f65a45                                |
+| {span.url.path="/api" && span.http.request.method="GET"} | URL equals to /api and HTTP method is GET                         |
+| {span.http.response.status_code >= 500}                  | HTTP status code is greater or equals to 500 ( Server side error) |
+
 
 ## OTEL Auto-Instrumentation
 - Create [Instrumentation](config/instrumentation.yaml)
