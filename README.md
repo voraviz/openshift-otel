@@ -13,6 +13,7 @@
     - [Cluster Observability Operator](#cluster-observability-operator)
       - [Tracing UI](#tracing-ui)
   - [Todo Application (with OpenTelemetry library)](#todo-application-with-opentelemetry-library)
+  - [TraceQL](#traceql)
   - [OTEL Auto-Instrumentation](#otel-auto-instrumentation)
     - [Todo App (without OpenTelemetry library)](#todo-app-without-opentelemetry-library)
     - [RESTful App](#restful-app)
@@ -323,7 +324,7 @@ pod/todo-7c6bddcdcb-t7pt6 condition met
 
   ![](images/todo-trace-update-todo-sql.png)
 
-- Example of TraceQL
+## TraceQL
 
 | TraceQL                                                  | Description                                                       |
 |----------------------------------------------------------|-------------------------------------------------------------------|
