@@ -41,12 +41,12 @@ spec:
         timeout: 2s
     exporters:
       otlp/dev:
-        change_endpoint: TEMPO
+        change_endpoint: TEMPO # Actual name is endpoint
         tls:
           insecure: true
           insecure_skip_verify: true
           ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"   
-          change_server_name_override: TEMPO_URL
+          change_server_name_override: TEMPO_URL  # Actual name is server_name_override
         auth:
           authenticator: bearertokenauth
         headers:
