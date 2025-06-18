@@ -68,3 +68,5 @@ spec:
         metrics:
           receivers: [spanmetrics]
           exporters: [prometheus]
+
+
