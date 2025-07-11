@@ -42,10 +42,25 @@ oc create -f config/frontend.yaml -n $PROJECT
 oc patch deployment/frontend \
     -p '{"spec":{"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-nodejs":"true"}}}}}' \
     -n $PROJECT
+oc set env deploy frontend OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-headless:4318 -n $PROJECT
+oc set env deploy frontend OTEL_SERVICE_NAME=frontend -n $PROJECT
+oc set env deploy frontend OTEL_PROPAGATORS=tracecontext,b3 -n $PROJECT
+oc create -f config/simple-rest-python.yaml -n $PROJECT
+oc patch deployment/simple-rest-python \
+    -p '{"spec":{"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-python":"true"}}}}}' \
+    -n $PROJECT
+oc set env deploy simple-rest-python OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-headless:4318 -n $PROJECT
+oc set env deploy simple-rest-python OTEL_SERVICE_NAME=simple-rest-python -n $PROJECT
 oc create -f config/otel-go-instrument-scc.yaml -n $PROJECT
 oc create sa go-lang-runner
 oc adm policy add-scc-to-user otel-go-instrumentation-scc -z go-lang-runner
 oc create -f config/simple-go.yaml -n $PROJECT
+oc create -f config/simple-rest-dotnet.yaml -n $PROJECT
+oc patch deployment/simple-rest-dotnet \
+    -p '{"spec":{"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-dotnet":"true"}}}}}' \
+    -n $PROJECT
+oc set env deploy simple-rest-python OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-headless:4318 -n $PROJECT
+oc set env deploy simple-rest-python OTEL_SERVICE_NAME=simple-rest-python -n $PROJECT
 oc create -f config/backend.yaml -n $PROJECT
 oc wait --for condition=ready --timeout=180s pod -l app=simple-go  -n $PROJECT
 oc wait --for condition=ready --timeout=180s pod -l app=frontend  -n $PROJECT
