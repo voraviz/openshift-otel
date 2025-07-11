@@ -18,7 +18,9 @@
     - [Todo App (without OpenTelemetry library)](#todo-app-without-opentelemetry-library)
     - [RESTful App](#restful-app)
       - [Node.js](#nodejs)
+      - [Python](#python)
       - [Go-lang](#go-lang)
+      - [.NET Core](#net-core)
       - [Java App](#java-app)
       - [Test RESTful App](#test-restful-app)
   - [Grafana](#grafana)
@@ -476,7 +478,82 @@ oc set env deploy frontend OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-hea
 oc set env deploy frontend OTEL_SERVICE_NAME=frontend -n $PROJECT
 oc set env deploy frontend OTEL_PROPAGATORS=tracecontext,b3 -n $PROJECT
 ```
+#### Python
+- Deploy Python app
 
+```bash
+oc create -f config/simple-rest-python.yaml -n $PROJECT
+```
+
+Output
+
+```bash
+deployment.apps/simple-rest-python created
+service/simple-rest-python created
+```
+
+- Annotate deployment for auto-instrumentation
+
+```bash
+oc patch deployment/simple-rest-python \
+    -p '{"spec":{"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-python":"true"}}}}}' \
+    -n $PROJECT
+```
+
+Output
+
+```bash
+deployment.apps/simple-rest-python patched
+```
+- Verify that auto-instrumentation is working with init-container
+
+```bash
+oc get po $(oc get po -l app=simple-rest-python -o custom-columns='Name:.metadata.name' -n $PROJECT --no-headers) -n $PROJECT -o jsonpath='{.status.initContainerStatuses}'|jq
+```
+
+Output
+
+```json
+[
+  {
+    "containerID": "cri-o://1f6ee4ae0581c7ffd2ab428c039414533d07dbc9666a471b495d45e19e5c3c03",
+    "image": "ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.54b1",
+    "imageID": "ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python@sha256:3b0c54aefaf735835e23a6ec8b81f34d4357e7444d3a0e78cd6acfa1fc3485fc",
+    "lastState": {},
+    "name": "opentelemetry-auto-instrumentation-python",
+    "ready": true,
+    "restartCount": 0,
+    "started": false,
+    "state": {
+      "terminated": {
+        "containerID": "cri-o://1f6ee4ae0581c7ffd2ab428c039414533d07dbc9666a471b495d45e19e5c3c03",
+        "exitCode": 0,
+        "finishedAt": "2025-07-10T13:22:31Z",
+        "reason": "Completed",
+        "startedAt": "2025-07-10T13:22:31Z"
+      }
+    },
+    "volumeMounts": [
+      {
+        "mountPath": "/otel-auto-instrumentation-python",
+        "name": "opentelemetry-auto-instrumentation-python"
+      },
+      {
+        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+        "name": "kube-api-access-hdsj2",
+        "readOnly": true,
+        "recursiveReadOnly": "Disabled"
+      }
+    ]
+  }
+]
+```
+- Set environment variables
+
+```bash
+oc set env deploy simple-rest-python OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-headless:4318 -n $PROJECT
+oc set env deploy simple-rest-python OTEL_SERVICE_NAME=simple-rest-python -n $PROJECT
+```
 #### Go-lang
 
 *Remark: With opentelemetry-operator.v0.119.0-2 and go autoinstrumentation-go:v0.20.0 only work with golang 1.23*
@@ -547,6 +624,61 @@ simple-go-56f8c644b-w4sxw   2/2     Running   0          7m42s
 opentelemetry-auto-instrumentation
 ```
 
+#### .NET Core
+- Deploy .NET Core app
+
+```bash
+oc create -f config/simple-rest-dotnet.yaml -n $PROJECT
+```
+
+Output
+
+```bash
+deployment.apps/simple-rest-dotnet created
+service/simple-rest-dotnet created
+```
+
+- Annotate deployment for auto-instrumentation
+
+```bash
+oc patch deployment/simple-rest-dotnet \
+    -p '{"spec":{"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-dotnet":"true"}}}}}' \
+    -n $PROJECT
+```
+
+Output
+
+```bash
+deployment.apps/simple-rest-dotnet patched
+```
+- Verify that auto-instrumentation is working with init-container
+
+```bash
+oc get po $(oc get po -l app=simple-rest-dotnet -o custom-columns='Name:.metadata.name' -n $PROJECT --no-headers) -n $PROJECT -o jsonpath='{.status.initContainerStatuses}'|jq
+```
+
+Output
+
+```json
+[
+  {
+    "containerID": "cri-o://3c5a2875af666df5ab116df7e917261e4dce5606f523910538cceacffa051d06",
+    "image": "ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.2.0",
+    "imageID": "ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet@sha256:093f0057f30022d0d4f4fbdbd3104c48879c8424d7acec0b46e9cb86a3d95e10",
+    "lastState": {},
+    "name": "opentelemetry-auto-instrumentation-dotnet",
+    "ready": true,
+    "restartCount": 1,
+    "started": false,
+  ...
+```
+- Set environment variables
+
+```bash
+oc set env deploy simple-rest-python OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-headless:4318 -n $PROJECT
+oc set env deploy simple-rest-python OTEL_SERVICE_NAME=simple-rest-dotnet -n $PROJECT
+```
+
 #### Java App
 - Deploy [Java RESTful App](config/backend.yaml)
 
@@ -609,6 +741,10 @@ INFO running in /deployments
 Picked up JAVA_TOOL_OPTIONS:  -javaagent:/otel-auto-instrumentation-java/javaagent.jar
 OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
 ```
+- Verify applications in Dev Console
+
+![](images/app-x.png)
+
 
 #### Test RESTful App
 - Test app
@@ -621,7 +757,7 @@ Output
 
 ```bash
 * Connection #0 to host frontend-demo.apps.cluster-4thxh.4thxh.sandbox2298.opentlc.com left intact
-Frontend version: v1 => [Backend: http://simple-go:8080, Response: 200, Body: Backend version:v1, Response:200, Host:backend-68589df886-gtbpx, Status:200, Message: Hello, World]
+Frontend version: v1 => [Backend: http://simple-rest-python:5000/api, Response: 200, Body: Backend version:v1, Response:200, Host:backend-855ddff6c5-rlhgd, Status:200, Message: Hello, World]
 ```
 
 - Check trace in console with Query  *{rootServiceName="frontend"}*
