@@ -1,43 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: simple-rest-python
   annotations:
     app.openshift.io/vcs-ref: master
-    app.openshift.io/vcs-uri: 'https://gitlab.com/ocp-demo/frontend-js'
+    app.openshift.io/vcs-uri: 'https://github.com/voraviz/simple-rest-python'
     app.openshift.io/connects-to: >-
-      [{"apiVersion":"apps/v1","kind":"Deployment","name":"simple-rest-python"}]
+      [{"apiVersion":"apps/v1","kind":"Deployment","name":"simple-go"}]
   labels:
-    app.kubernetes.io/component: frontend
-    app.kubernetes.io/instance: frontend
-    app.kubernetes.io/name: frontend
+    app.kubernetes.io/component: simple-rest-python
+    app.kubernetes.io/instance: simple-rest-python
+    app.kubernetes.io/name: simple-rest-python
     app.kubernetes.io/part-of: App-X
-    app.openshift.io/runtime: nodejs
+    app.openshift.io/runtime: python
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: simple-rest-python
       version: v1
   template:
     metadata:
       labels:
-        app: frontend
+        app: simple-rest-python
         version: v1
       # annotations:
       #   instrumentation.opentelemetry.io/inject-nodejs: "true"
     spec:
       containers:
-      - name: frontend
-        image: quay.io/voravitl/frontend-js:not-forward-b3-headers
+      - name: simple-rest-python
+        image: quay.io/voravitl/simple-rest-python:latest
         imagePullPolicy: Always
         env:
-          - name: BACKEND_URL
-            value: http://simple-rest-python:5000/api
+          - name: BACKEND
+            value: http://simple-go:8080
           # - name: OTEL_EXPORTER_OTLP_ENDPOINT
           #   value: http://otel-collector-headless:4318  
           # - name: OTEL_SERVICE_NAME
-          #   value: frontend
+          #   value: simple-rest-python
           # - name: OTEL_PROPAGATORS
           #   value: tracecontext,b3
         resources:
@@ -46,9 +46,9 @@ spec:
             memory: 60Mi
           limits:
             cpu: "0.2"
-            memory: 300Mi
+            memory: 100Mi
         ports:
-        - containerPort: 8080
+        - containerPort: 5000
         securityContext:
           seccompProfile: #"RuntimeDefault" or "Localhost"
             type: RuntimeDefault
@@ -62,28 +62,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend
+  name: simple-rest-python
   labels:
-    app: frontend
+    app: simple-rest-python
 spec:
   ports:
-  - port: 8080
+  - port: 5000
     name: http
-    targetPort: 8080
+    targetPort: 5000
   selector:
-    app: frontend
----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: frontend
-spec:
-  port:
-    targetPort: http
-  tls:
-    termination: edge
-  to:
-    kind: Service
-    name: frontend
-    weight: 100
-  wildcardPolicy: None
+    app: simple-rest-python

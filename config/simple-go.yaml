@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    app.openshift.io/connects-to: '[{"apiVersion":"apps/v1","kind":"Deployment","name":"backend"}]'
+    app.openshift.io/connects-to: '[{"apiVersion":"apps/v1","kind":"Deployment","name":"simple-rest-dotnet"}]'
   labels:
     app.kubernetes.io/component: simple-go
     app.kubernetes.io/instance: simple-go
@@ -37,7 +37,7 @@ spec:
       containers:
       - env:
         - name: BACKEND
-          value: http://backend:8080
+          value: http://simple-rest-dotnet:8080/api
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: http://otel-collector-headless:4318
         - name: OTEL_SERVICE_NAME

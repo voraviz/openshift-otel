@@ -1,43 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: simple-rest-dotnet
   annotations:
-    app.openshift.io/vcs-ref: master
-    app.openshift.io/vcs-uri: 'https://gitlab.com/ocp-demo/frontend-js'
+    app.openshift.io/vcs-ref: main
+    app.openshift.io/vcs-uri: 'https://github.com/voraviz/simple-rest-dotnet'
     app.openshift.io/connects-to: >-
-      [{"apiVersion":"apps/v1","kind":"Deployment","name":"simple-rest-python"}]
+      [{"apiVersion":"apps/v1","kind":"Deployment","name":"backend"}]
   labels:
-    app.kubernetes.io/component: frontend
-    app.kubernetes.io/instance: frontend
-    app.kubernetes.io/name: frontend
+    app.kubernetes.io/component: simple-rest-dotnet
+    app.kubernetes.io/instance: simple-rest-dotnet
+    app.kubernetes.io/name: simple-rest-dotnet
     app.kubernetes.io/part-of: App-X
-    app.openshift.io/runtime: nodejs
+    app.openshift.io/runtime: dotnet
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: simple-rest-dotnet
       version: v1
   template:
     metadata:
       labels:
-        app: frontend
+        app: simple-rest-dotnet
         version: v1
       # annotations:
       #   instrumentation.opentelemetry.io/inject-nodejs: "true"
     spec:
       containers:
-      - name: frontend
-        image: quay.io/voravitl/frontend-js:not-forward-b3-headers
+      - name: simple-rest-dotnet
+        image: quay.io/voravitl/simple-rest-dotnet:latest
         imagePullPolicy: Always
         env:
-          - name: BACKEND_URL
-            value: http://simple-rest-python:5000/api
+          - name: BACKEND
+            value: http://backend:8080
           # - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          #   value: http://otel-collector-headless:4318  
+          #   value: http://otel-collector-headless:4318
           # - name: OTEL_SERVICE_NAME
-          #   value: frontend
+          #   value: simple-rest-dotnet          # - name: OTEL_EXPORTER_OTLP_ENDPOINT
           # - name: OTEL_PROPAGATORS
           #   value: tracecontext,b3
         resources:
@@ -48,7 +48,7 @@ spec:
             cpu: "0.2"
             memory: 300Mi
         ports:
-        - containerPort: 8080
+        - containerPort: 5000
         securityContext:
           seccompProfile: #"RuntimeDefault" or "Localhost"
             type: RuntimeDefault
@@ -62,28 +62,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend
+  name: simple-rest-dotnet
   labels:
-    app: frontend
+    app: simple-rest-dotnet
 spec:
   ports:
   - port: 8080
     name: http
     targetPort: 8080
   selector:
-    app: frontend
----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: frontend
-spec:
-  port:
-    targetPort: http
-  tls:
-    termination: edge
-  to:
-    kind: Service
-    name: frontend
-    weight: 100
-  wildcardPolicy: None
+    app: simple-rest-dotnet
