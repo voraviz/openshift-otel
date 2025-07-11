@@ -676,7 +676,7 @@ Output
 
 ```bash
 oc set env deploy simple-rest-python OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-headless:4318 -n $PROJECT
-oc set env deploy simple-rest-python OTEL_SERVICE_NAME=simple-rest-dotnet -n $PROJECT
+oc set env deploy simple-rest-python OTEL_SERVICE_NAME=simple-rest-python -n $PROJECT
 ```
 
 #### Java App
