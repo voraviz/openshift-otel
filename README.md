@@ -762,7 +762,13 @@ Frontend version: v1 => [Backend: http://simple-rest-python:5000/api, Response: 
 
 - Check trace in console with Query  *{rootServiceName="frontend"}*
   
+  Select service
+
   ![](images/trace-ui-with-root-frontend.png)
+
+  Traces
+
+  ![](images/trace-ui-with-root-frontend-2.png)
 
   - Overall Trace
   
