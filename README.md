@@ -27,7 +27,9 @@
 
 ## TL;DR
 
-- If you're too busy then try this all in one [bash script](setup.sh) to setup Tempo Monolithic.
+If you're too busy then try this all in one [setup-tempo-monolithic.sh](etup-tempo-monolithic.sh) to setup Tempo Monolithic and run [setup-demo-app.sh](setup-demo-app.sh) to deploy sample applications.
+
+In case you want tempo stack then try [setup-tempo-stack.sh](setup-tempo-stack.sh) to setup Tempo Stack but you need to modify S3 configuration.
 
 ## Operators
 - Create project demo
