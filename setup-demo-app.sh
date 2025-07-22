@@ -46,7 +46,7 @@ while [ $COUNT -lt 10 ];
 do 
   curl -v $FRONTEND_URL
   SLEEP=$(( ( RANDOM % 5 )  + 1 ))
-  curl -v $TODO_URL
+  curl -v $TODO_URL/api
   SLEEP=$(( ( RANDOM % 5 )  + 1 ))
   COUNT=$((COUNT+1))
 done
